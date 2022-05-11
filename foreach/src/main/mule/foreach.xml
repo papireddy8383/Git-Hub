@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ba0ed70b-5c99-4d67-bd55-c4a5f1aa35bb" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="eaee9e95-871e-465e-9d8f-52c078ceab92" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="17FE5a0338@" database="mydb" />
+	</db:config>
+	<db:config name="Database_Config1" doc:name="Database Config" doc:id="6b96c86b-d847-40a5-91e2-cff277faca2e" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="17FE5a0338@" database="mydb1" />
+	</db:config>
+	<db:config name="Database_Config2" doc:name="Database Config" doc:id="7cafb995-eb3d-415f-aa6b-533fa4fcef0c" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="17FE5a0338@" database="mydb1" />
+	</db:config>
+	<flow name="foreachFlow" doc:id="963447b3-8b0b-4113-9021-0bb80a90fef0" >
+		<http:listener doc:name="Listener" doc:id="e2e87279-6c8e-44be-b52e-94a7762c9afc" config-ref="HTTP_Listener_config" path="foreach"/>
+		<ee:transform doc:name="Transform Message" doc:id="8ac4731f-0663-4c6f-bcce-47a1563465c0" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+
+1 to 1000 map
+{
+	id: if ($$ == 4) 'super' else 200 + $$,
+	name: "papi reddy",
+	lname:"pulicharla",
+	number:"7893498383"
+	
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<batch:job jobName="foreachBatch_Job" doc:id="bccdc1f4-bcad-4e5a-806f-d945b88aceeb" >
+			<batch:process-records >
+				<batch:step name="Batch_Step" doc:id="0649e9ae-7087-4ea5-bd15-f0d949eaef8c" >
+					<batch:aggregator doc:name="Batch Aggregator" doc:id="da540e6d-d525-44e5-b125-52dfa3ce37a1" size="30">
+						<logger level="INFO" doc:name="Logger" doc:id="ae970cb3-5bd7-4751-a49a-a269e2d3c7c3" message="#[payload]" />
+						<db:bulk-insert doc:name="Bulk insert" doc:id="6cfb9a8e-301b-4326-9b3a-7f76cf4c809c" config-ref="Database_Config2">
+							<db:sql ><![CDATA[insert into mydb1.emp (id, name, number, lname) values (:id, :name, :number, :lname);]]></db:sql>
+						</db:bulk-insert>
+					</batch:aggregator>
+				</batch:step>
+			</batch:process-records>
+			<batch:on-complete >
+				<ee:transform doc:name="Transform Message" doc:id="71062bd5-e9aa-42a3-8e86-809862c8d9e8" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="3649388a-dd3c-4aee-8e33-e5a242f333fd" message="#[payload]"/>
+			</batch:on-complete>
+		</batch:job>
+	</flow>
+</mule>
