@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="c6d0c855-e87b-4112-8982-81d922d8150f" >
+		<http:listener-connection host="localhost" port="8080" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="f53de752-21f4-41f4-be0b-89b7d5ac2296" />
+	<file:config name="File_Config1" doc:name="File Config" doc:id="96f0e084-31ad-4ef6-922e-350ac1244e41" />
+	<file:config name="File_Config2" doc:name="File Config" doc:id="475c158a-0fa4-4031-9847-29c3dea25aff" />
+	<file:config name="File_Config3" doc:name="File Config" doc:id="0a070a1a-8575-470c-a4ab-d6117583946a" />
+	<file:config name="File_Config4" doc:name="File Config" doc:id="14cc8ac8-3b08-4fb5-905c-d1ede1ff3c5c" />
+	<flow name="helloFlow" doc:id="0da08800-d437-4e66-97f9-0934cf39cf98" >
+		<file:listener doc:name="On New or Updated File" doc:id="dd875904-f93f-4588-a35b-96d04660d99c" config-ref="File_Config4" directory="C:\Users\Mallikharjuna Reddy\OneDrive\Desktop\on new or upadating file" moveToDirectory="C:\Users\Mallikharjuna Reddy\OneDrive\Documents\SF" renameTo="b.text">
+			<scheduling-strategy >
+				<fixed-frequency frequency="1" timeUnit="MINUTES" />
+			</scheduling-strategy>
+		</file:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="ead6f906-9369-4a61-a6a5-809ee4bc4f4b" message="#[payload]"/>
+	</flow>
+</mule>
